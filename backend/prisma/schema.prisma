@@ -1,0 +1,124 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      String    @default("STUDENT")  // TEACHER or STUDENT
+  avatarUrl String?
+  createdAt DateTime  @default(now())
+  quizzes   Quiz[]    @relation("TeacherQuizzes")
+  sessions  Session[] @relation("HostSessions")
+  players   Player[]
+  answers   Answer[]  @relation("UserAnswers")
+
+  @@map("users")
+}
+
+model Quiz {
+  id             String     @id @default(uuid())
+  title          String
+  description    String?
+  coverImage     String?
+  teacherId      String
+  teacher        User       @relation("TeacherQuizzes", fields: [teacherId], references: [id])
+  totalQuestions Int
+  playCount      Int        @default(0)
+  status         String     @default("DRAFT")  // DRAFT or PUBLISHED
+  source         String     @default("MANUAL") // MANUAL or PDF
+  createdAt      DateTime   @default(now())
+  questions      Question[]
+  sessions       Session[]
+
+  @@map("quizzes")
+}
+
+model Question {
+  id         String    @id @default(uuid())
+  quizId     String
+  quiz       Quiz      @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  content    String
+  type       String    @default("MCQ")  // MCQ or TRUE_FALSE
+  timeLimit  Int       @default(20)
+  points     Int       @default(1000)
+  orderIndex Int
+  options    Option[]
+  answers    Answer[]
+
+  @@map("questions")
+}
+
+model Option {
+  id         String   @id @default(uuid())
+  questionId String
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  content    String
+  isCorrect  Boolean
+  color      String?
+  orderIndex Int
+  answers    Answer[]
+
+  @@map("options")
+}
+
+model Session {
+  id            String    @id @default(uuid())
+  pin           String    @unique
+  quizId        String
+  quiz          Quiz      @relation(fields: [quizId], references: [id])
+  hostId        String
+  host          User      @relation("HostSessions", fields: [hostId], references: [id])
+  status        String    @default("WAITING")  // WAITING, LIVE, or ENDED
+  currentQIndex Int       @default(0)
+  startedAt     DateTime?
+  endedAt       DateTime?
+  createdAt     DateTime  @default(now())
+  players       Player[]
+  answers       Answer[]
+
+  @@map("sessions")
+}
+
+model Player {
+  id         String   @id @default(uuid())
+  sessionId  String
+  session    Session  @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id])
+  nickname   String
+  avatar     String?
+  totalScore Int      @default(0)
+  rank       Int?
+  joinedAt   DateTime @default(now())
+  answers    Answer[]
+
+  @@map("players")
+}
+
+model Answer {
+  id           String   @id @default(uuid())
+  playerId     String
+  player       Player   @relation(fields: [playerId], references: [id], onDelete: Cascade)
+  questionId   String
+  question     Question @relation(fields: [questionId], references: [id])
+  optionId     String?
+  option       Option?  @relation(fields: [optionId], references: [id])
+  sessionId    String
+  session      Session  @relation(fields: [sessionId], references: [id])
+  userId       String?
+  user         User?    @relation("UserAnswers", fields: [userId], references: [id], onDelete: Cascade)
+  isCorrect    Boolean
+  timeTaken    Float?
+  pointsEarned Int      @default(0)
+  answeredAt   DateTime @default(now())
+
+  @@map("answers")
+}
