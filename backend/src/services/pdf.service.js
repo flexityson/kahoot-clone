@@ -3,7 +3,16 @@ const { Groq } = require('groq-sdk')
 const prisma = require('../config/database')
 const env = require('../config/env')
 
-const groq = new Groq({ apiKey: env.GROQ_API_KEY })
+let groq = null
+function getGroq() {
+  if (!groq) {
+    if (!env.GROQ_API_KEY) {
+      throw new Error('GROQ_API_KEY is not configured. PDF-to-quiz generation is unavailable.')
+    }
+    groq = new Groq({ apiKey: env.GROQ_API_KEY })
+  }
+  return groq
+}
 
 async function extractTextFromPDF(fileBuffer) {
   const data = await pdfParse(fileBuffer)
@@ -45,7 +54,7 @@ ${text}
 `
 
   try {
-    const response = await groq.chat.completions.create({
+    const response = await getGroq().chat.completions.create({
       model: 'llama3-8b-8192',
       messages: [{ role: 'user', content: prompt }],
       temperature: 0.3,
