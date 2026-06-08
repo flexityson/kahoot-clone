@@ -10,8 +10,20 @@ const sessionRoutes = require('./routes/session.routes')
 
 const app = express()
 
+const allowedOrigins = [
+  env.FRONTEND_URL,
+  'http://localhost:5173',
+  'http://localhost:4173'
+]
+
 app.use(cors({
-  origin: env.FRONTEND_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.some(o => origin.startsWith(o)) || origin.endsWith('.vercel.app')) {
+      callback(null, true)
+    } else {
+      callback(new Error(`Origin ${origin} not allowed by CORS`))
+    }
+  },
   credentials: true
 }))
 app.use(express.json())
