@@ -1,21 +1,19 @@
-const { getIO } = require('../../config/socket')
 const prisma = require('../../config/database')
 
-function initDisconnectHandlers() {
-  const io = getIO()
-
-  io.on('disconnect', async (socket) => {
-    console.log(`Socket disconnected: ${socket.id}`)
-
+function initDisconnectHandlers(io, socket) {
+  // Use 'disconnecting' event for room broadcasts — at this point the socket
+  // is STILL in its rooms, so socket.to(...) can reach the right recipients.
+  // The 'disconnect' event fires AFTER rooms are already left, so broadcasts
+  // from disconnect would go nowhere.
+  socket.on('disconnecting', async () => {
     const playerId = socket.data.playerId
     const sessionId = socket.data.sessionId
 
-    if (playerId) {
+    if (playerId && sessionId) {
       try {
-        // Get player info before deleting
         const player = await prisma.player.findUnique({
           where: { id: playerId },
-          include: { session: true }
+          select: { nickname: true, sessionId: true }
         })
 
         if (player) {
@@ -33,7 +31,20 @@ function initDisconnectHandlers() {
             sessionId: player.sessionId
           })
         }
+      } catch (error) {
+        console.error('Disconnecting handler error:', error)
+      }
+    }
+  })
 
+  // Use 'disconnect' for cleanup that doesn't need room access
+  socket.on('disconnect', async () => {
+    console.log(`Socket disconnected: ${socket.id}`)
+
+    const playerId = socket.data.playerId
+
+    if (playerId) {
+      try {
         // Delete player record
         await prisma.player.delete({
           where: { id: playerId }
@@ -41,7 +52,7 @@ function initDisconnectHandlers() {
 
         console.log(`Player ${playerId} removed from session`)
       } catch (error) {
-        console.error('Disconnect handler error:', error)
+        console.error('Disconnect cleanup error:', error)
       }
     }
 
@@ -49,14 +60,6 @@ function initDisconnectHandlers() {
     if (socket.data.timerInterval) {
       clearInterval(socket.data.timerInterval)
     }
-
-    // Leave any rooms
-    const rooms = [...socket.rooms]
-    rooms.forEach(room => {
-      if (room !== socket.id) {
-        socket.leave(room)
-      }
-    })
   })
 }
 

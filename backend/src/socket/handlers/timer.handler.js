@@ -1,10 +1,6 @@
-const { getIO } = require('../../config/socket')
-
-function initTimerHandlers() {
-  const io = getIO()
-
+function initTimerHandlers(io, socket) {
   // Start countdown timer for a question
-  io.on('timer:start', async ({ sessionId, duration }, socket) => {
+  socket.on('timer:start', async ({ sessionId, duration }) => {
     try {
       const totalTime = duration || 20
       let remaining = totalTime
@@ -38,7 +34,7 @@ function initTimerHandlers() {
   })
 
   // Stop countdown timer
-  io.on('timer:stop', ({ sessionId }, socket) => {
+  socket.on('timer:stop', ({ sessionId }) => {
     try {
       if (socket.data.timerInterval) {
         clearInterval(socket.data.timerInterval)
@@ -59,7 +55,7 @@ function initTimerHandlers() {
   })
 
   // Reset timer to initial value
-  io.on('timer:reset', ({ sessionId, duration }, socket) => {
+  socket.on('timer:reset', ({ sessionId, duration }) => {
     try {
       if (socket.data.timerInterval) {
         clearInterval(socket.data.timerInterval)

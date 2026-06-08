@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, Link } from 'react-router-dom'
 import { quizService } from '../../services/quizService'
 import Button from '../../components/shared/Button'
 import Input from '../../components/shared/Input'
@@ -45,6 +45,13 @@ export default function TeacherEdit() {
   }
 
   const handleSave = async () => {
+    for (let i = 0; i < quiz.questions.length; i++) {
+      if (!quiz.questions[i].options.some(o => o.isCorrect)) {
+        toast.error(`Question ${i + 1} needs a correct answer selected`)
+        return
+      }
+    }
+
     setSaving(true)
     try {
       await quizService.updateQuestions(id, quiz.questions)
@@ -64,7 +71,16 @@ export default function TeacherEdit() {
     )
   }
 
-  if (!quiz) return null
+  if (!quiz && !loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="bg-white rounded-2xl p-8 text-center">
+          <p className="text-xl mb-4">Quiz not found</p>
+          <Link to="/teacher/quizzes" className="text-purple-600 hover:underline">Back to quizzes</Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-100">

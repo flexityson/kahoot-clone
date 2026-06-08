@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useAuthStore } from '../../store/authStore'
 import { sessionService } from '../../services/sessionService'
 import Button from '../../components/shared/Button'
@@ -20,9 +21,9 @@ export default function StudentHistory() {
       <nav className="bg-white shadow p-4">
         <div className="max-w-6xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold text-purple-600">My Game History</h1>
-          <a href="/student">
+          <Link to="/student">
             <Button variant="outline">Back</Button>
-          </a>
+          </Link>
         </div>
       </nav>
 
@@ -33,7 +34,7 @@ export default function StudentHistory() {
           <EmptyState
             icon="🎮"
             title="No games played yet"
-            description="Join a game to start building your history"
+            description="Game history coming soon..."
           />
         ) : (
           <div className="space-y-4">

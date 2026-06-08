@@ -5,7 +5,7 @@ async function register(name, email, password, role = 'STUDENT') {
   const existingUser = await prisma.user.findUnique({ where: { email } })
 
   if (existingUser) {
-    throw new Error('Email already registered')
+    throw new Error('Registration failed')
   }
 
   const hashedPassword = await hashPassword(password)

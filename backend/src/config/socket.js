@@ -13,7 +13,8 @@ function initSocket(server) {
   io = new Server(server, {
     cors: {
       origin: (origin, callback) => {
-        if (!origin || allowedOrigins.some(o => origin.startsWith(o)) || origin.endsWith('.vercel.app')) {
+        if (!origin || allowedOrigins.includes(origin) ||
+            (typeof origin === 'string' && origin.endsWith('.vercel.app') && origin.indexOf('://') > 0)) {
           callback(null, true)
         } else {
           callback(new Error(`Origin ${origin} not allowed by CORS`))
@@ -22,14 +23,6 @@ function initSocket(server) {
       methods: ['GET', 'POST'],
       credentials: true
     }
-  })
-
-  io.on('connection', (socket) => {
-    console.log(`Socket connected: ${socket.id}`)
-
-    socket.on('disconnect', () => {
-      console.log(`Socket disconnected: ${socket.id}`)
-    })
   })
 
   return io

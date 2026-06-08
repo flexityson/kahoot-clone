@@ -53,6 +53,14 @@ export default function TeacherCreate() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
+
+    for (let i = 0; i < formData.questions.length; i++) {
+      if (!formData.questions[i].options.some(o => o.isCorrect)) {
+        toast.error(`Question ${i + 1} needs a correct answer selected`)
+        return
+      }
+    }
+
     setLoading(true)
 
     try {

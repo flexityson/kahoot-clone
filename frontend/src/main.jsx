@@ -12,6 +12,7 @@ import TeacherQuizzes from './pages/teacher/TeacherQuizzes'
 import TeacherCreate from './pages/teacher/TeacherCreate'
 import TeacherEdit from './pages/teacher/TeacherEdit'
 import TeacherHost from './pages/teacher/TeacherHost'
+import TeacherHostGame from './pages/teacher/TeacherHostGame'
 import PDFUpload from './pages/teacher/PDFUpload'
 
 import StudentHome from './pages/student/StudentHome'
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Login />} />
 
         {/* Teacher Routes */}
         <Route path="/teacher" element={<ProtectedRoute role="TEACHER" component={TeacherHome} />} />
@@ -37,6 +39,7 @@ createRoot(document.getElementById('root')).render(
         <Route path="/teacher/create" element={<ProtectedRoute role="TEACHER" component={TeacherCreate} />} />
         <Route path="/teacher/edit/:id" element={<ProtectedRoute role="TEACHER" component={TeacherEdit} />} />
         <Route path="/teacher/host/:id" element={<ProtectedRoute role="TEACHER" component={TeacherHost} />} />
+        <Route path="/teacher/host-game/:sessionId" element={<ProtectedRoute role="TEACHER" component={TeacherHostGame} />} />
         <Route path="/teacher/pdf-upload" element={<ProtectedRoute role="TEACHER" component={PDFUpload} />} />
 
         {/* Student Routes */}

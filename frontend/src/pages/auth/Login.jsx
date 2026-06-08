@@ -17,7 +17,6 @@ export default function Login() {
 
   const login = useAuthStore((state) => state.login)
   const register = useAuthStore((state) => state.register)
-  const setUser = useAuthStore((state) => state.setUser)
   const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
@@ -30,7 +29,7 @@ export default function Login() {
         toast.success('Welcome back!')
       } else {
         await register(formData.name, formData.email, formData.password, formData.role)
-        toast.success('Account created!')
+        toast.success('Account created successfully!')
       }
       navigate('/')
     } catch (error) {
@@ -41,53 +40,85 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 to-purple-900 flex items-center justify-center p-4">
-      <div className="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
-        <h1 className="text-3xl font-bold text-center mb-2 text-gray-800">
-          {isLogin ? 'Welcome Back' : 'Create Account'}
-        </h1>
-        <p className="text-center text-gray-600 mb-8">
-          {isLogin ? 'Sign in to continue' : 'Join the classroom fun'}
-        </p>
+    <div className="min-h-screen bg-slate-950 text-white relative overflow-hidden flex items-center justify-center p-4">
+      {/* Decorative background shapes */}
+      <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-purple-900/20 blur-[120px] pointer-events-none"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-900/20 blur-[120px] pointer-events-none"></div>
+      
+      {/* Grid pattern overlay */}
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
 
-        <form onSubmit={handleSubmit}>
+      {/* Floating Logo / Home button */}
+      <div className="absolute top-6 left-6 z-20">
+        <Link to="/" className="flex items-center gap-3">
+          <span className="text-2xl">🎓</span>
+          <span className="text-xl font-black tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-purple-400 via-violet-400 to-indigo-400">
+            CLASSROOM QUEST
+          </span>
+        </Link>
+      </div>
+
+      <div className="w-full max-w-md bg-white/[0.03] border border-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl relative z-10 animate-scale-up">
+        {/* Floating glow decoration behind card */}
+        <div className="absolute inset-0 -z-10 rounded-3xl bg-purple-500/10 blur-xl"></div>
+
+        <div className="text-center mb-8">
+          <span className="text-3xl inline-block mb-3">🔑</span>
+          <h1 className="text-3xl font-black tracking-tight text-white mb-2">
+            {isLogin ? 'Welcome Back' : 'Create Account'}
+          </h1>
+          <p className="text-slate-400 text-sm">
+            {isLogin ? 'Sign in to continue your adventure' : 'Join the classroom quest today'}
+          </p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
           {!isLogin && (
-            <Input
-              label="Name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              placeholder="Your name"
-              required
-            />
+            <div className="space-y-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                placeholder="Your name"
+                className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-900/50 text-white focus:border-purple-500 focus:outline-none transition-all duration-200"
+                required
+              />
+            </div>
           )}
 
-          <Input
-            label="Email"
-            type="email"
-            value={formData.email}
-            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-            placeholder="your@email.com"
-            required
-          />
+          <div className="space-y-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">Email Address</label>
+            <input
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              placeholder="you@school.edu"
+              className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-900/50 text-white focus:border-purple-500 focus:outline-none transition-all duration-200"
+              required
+            />
+          </div>
 
-          <Input
-            label="Password"
-            type="password"
-            value={formData.password}
-            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-            placeholder="••••••••"
-            required
-          />
+          <div className="space-y-1">
+            <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">Password</label>
+            <input
+              type="password"
+              value={formData.password}
+              onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+              placeholder="••••••••"
+              className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-900/50 text-white focus:border-purple-500 focus:outline-none transition-all duration-200"
+              required
+              minLength={6}
+            />
+          </div>
 
           {!isLogin && (
-            <div className="mb-6">
-              <label className="block text-sm font-medium mb-2 text-gray-700">
-                I am a...
-              </label>
+            <div className="space-y-1">
+              <label className="block text-xs font-bold uppercase tracking-wider text-slate-400">I am a...</label>
               <select
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="w-full px-4 py-3 rounded-xl border-2 border-gray-300 focus:border-purple-600 focus:outline-none"
+                className="w-full px-4 py-3 rounded-xl border border-slate-700 bg-slate-900 text-white focus:border-purple-500 focus:outline-none transition-all duration-200"
               >
                 <option value="STUDENT">Student</option>
                 <option value="TEACHER">Teacher</option>
@@ -98,21 +129,24 @@ export default function Login() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full"
+            variant="primary"
+            className="w-full py-3.5 mt-6 tracking-wider font-extrabold"
           >
-            {loading ? 'Please wait...' : (isLogin ? 'Sign In' : 'Create Account')}
+            {loading ? 'Processing...' : (isLogin ? 'Sign In' : 'Create Account')}
           </Button>
         </form>
 
-        <p className="text-center mt-6 text-gray-600">
-          {isLogin ? "Don't have an account? " : "Already have an account? "}
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="text-purple-600 font-bold hover:underline"
-          >
-            {isLogin ? 'Sign up' : 'Sign in'}
-          </button>
-        </p>
+        <div className="text-center mt-6">
+          <p className="text-slate-400 text-sm">
+            {isLogin ? "Don't have an account? " : "Already have an account? "}
+            <button
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-purple-400 font-extrabold hover:text-purple-300 hover:underline transition"
+            >
+              {isLogin ? 'Register now' : 'Sign in'}
+            </button>
+          </p>
+        </div>
       </div>
     </div>
   )

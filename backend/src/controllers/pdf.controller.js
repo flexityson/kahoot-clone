@@ -2,6 +2,9 @@ const pdfService = require('../services/pdf.service')
 
 async function uploadAndGenerateQuiz(req, res, next) {
   try {
+    if (!req.file) {
+      return res.status(400).json({ error: 'No PDF file uploaded' })
+    }
     const fileBuffer = req.file.buffer
     const { questionCount } = req.body
 
@@ -13,7 +16,7 @@ async function uploadAndGenerateQuiz(req, res, next) {
       })
     }
 
-    const count = parseInt(questionCount) || 10
+    const count = Math.min(Math.max(parseInt(questionCount) || 10, 1), 50)
     const quizData = await pdfService.generateQuizFromText(text, count)
 
     const quiz = await pdfService.saveGeneratedQuiz(quizData, req.user.id)

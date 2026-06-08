@@ -2,7 +2,22 @@ const prisma = require('../config/database')
 const generatePIN = require('../utils/generatePIN')
 
 async function createSession(quizId, hostId) {
-  const pin = generatePIN(6)
+  let pin
+  let attempts = 0
+  const maxAttempts = 3
+
+  while (attempts < maxAttempts) {
+    pin = generatePIN(6)
+    const existing = await prisma.session.findUnique({ where: { pin } })
+    if (!existing) {
+      break
+    }
+    attempts++
+  }
+
+  if (attempts >= maxAttempts) {
+    throw new Error('Unable to generate a unique PIN. Please try again.')
+  }
 
   return prisma.session.create({
     data: {

@@ -1,16 +1,41 @@
-const { getIO } = require('../../config/socket')
 const sessionService = require('../../services/session.service')
 const prisma = require('../../config/database')
 
-function initHostHandlers() {
-  const io = getIO()
+function initHostHandlers(io, socket) {
+  // Host joins a session room — frontend emits on mount
+  socket.on('host:join_session', async ({ sessionId }) => {
+    try {
+      socket.join(`session:${sessionId}`)
+      socket.data.sessionId = sessionId
+      socket.data.isHost = true
+
+      // Send current session state to the host
+      const session = await sessionService.getSessionById(sessionId)
+      const players = session.players?.map(p => ({
+        id: p.id,
+        nickname: p.nickname,
+        avatar: p.avatar,
+        totalScore: p.totalScore
+      })) || []
+
+      socket.emit('host:session_joined', {
+        sessionId,
+        players,
+        status: session.status,
+        currentQIndex: session.currentQIndex
+      })
+    } catch (error) {
+      console.error('Host join session error:', error)
+      socket.emit('host:error', { message: 'Failed to join session' })
+    }
+  })
 
   // Host starts the game
-  io.on('host:start_game', async ({ sessionId }, socket) => {
+  socket.on('host:start_game', async ({ sessionId }) => {
     try {
       const session = await sessionService.updateSessionStatus(sessionId, 'LIVE')
 
-      socket.to(`session:${sessionId}`).emit('game:started', {
+      io.to(`session:${sessionId}`).emit('game:started', {
         quiz: session.quiz
       })
 
@@ -25,10 +50,11 @@ function initHostHandlers() {
   })
 
   // Host moves to next question
-  io.on('host:next_question', async ({ sessionId }, socket) => {
+  socket.on('host:next_question', async ({ sessionId }) => {
     try {
-      const session = await sessionService.incrementCurrentQuestion(sessionId)
-      const currentQuestion = session.quiz.questions[session.currentQIndex]
+      const session = await sessionService.getSessionById(sessionId)
+      const questionIndex = session.currentQIndex
+      const currentQuestion = session.quiz.questions[questionIndex]
 
       if (!currentQuestion) {
         io.to(`session:${sessionId}`).emit('game:ended')
@@ -49,13 +75,23 @@ function initHostHandlers() {
             color: o.color
           }))
         },
-        questionIndex: session.currentQIndex,
+        questionIndex,
         totalQuestions: session.quiz.totalQuestions
       })
 
-      socket.emit('host:questionActive', {
-        questionIndex: session.currentQIndex
+      socket.emit('host:question_started', {
+        questionIndex,
+        timeLimit: currentQuestion.timeLimit,
+        question: {
+          id: currentQuestion.id,
+          content: currentQuestion.content,
+          timeLimit: currentQuestion.timeLimit,
+          points: currentQuestion.points
+        }
       })
+
+      // Increment for next question (after serving the current one)
+      await sessionService.incrementCurrentQuestion(sessionId)
     } catch (error) {
       console.error('Host next question error:', error)
       socket.emit('host:error', { message: 'Failed to load next question' })
@@ -63,7 +99,7 @@ function initHostHandlers() {
   })
 
   // Host ends current question and shows results
-  io.on('host:end_question', async ({ sessionId }, socket) => {
+  socket.on('host:end_question', async ({ sessionId }) => {
     try {
       const session = await sessionService.getSessionById(sessionId)
       const currentQuestion = session.quiz.questions[session.currentQIndex]
@@ -117,7 +153,7 @@ function initHostHandlers() {
   })
 
   // Host shows leaderboard
-  io.on('host:show_leaderboard', async ({ sessionId }, socket) => {
+  socket.on('host:show_leaderboard', async ({ sessionId }) => {
     try {
       const players = await prisma.player.findMany({
         where: { sessionId },
@@ -144,7 +180,7 @@ function initHostHandlers() {
   })
 
   // Host ends the game
-  io.on('host:end_game', async ({ sessionId }, socket) => {
+  socket.on('host:end_game', async ({ sessionId }) => {
     try {
       const session = await sessionService.endGame(sessionId)
 
@@ -181,7 +217,7 @@ function initHostHandlers() {
   })
 
   // Host skips to next question (emergency skip)
-  io.on('host:skip_question', async ({ sessionId }, socket) => {
+  socket.on('host:skip_question', async ({ sessionId }) => {
     try {
       const session = await sessionService.incrementCurrentQuestion(sessionId)
 

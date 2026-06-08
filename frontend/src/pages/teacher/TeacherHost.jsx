@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { sessionService } from '../../services/sessionService'
 import { quizService } from '../../services/quizService'
-import { getSocket } from '../../services/socketService'
+import { getSocket, connectSocket } from '../../services/socketService'
 import { useGameStore } from '../../store/gameStore'
 import Button from '../../components/shared/Button'
 import Loader from '../../components/shared/Loader'
@@ -15,7 +15,7 @@ export default function TeacherHost() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
   const [gameStarted, setGameStarted] = useState(false)
-  const socket = getSocket()
+  const socket = getSocket() || connectSocket()
 
   useEffect(() => {
     loadQuiz()
@@ -59,7 +59,7 @@ export default function TeacherHost() {
   const startGame = () => {
     socket.emit('host:start_game', { sessionId: session.id })
     setGameStarted(true)
-    navigate(`/game/${session.id}`)
+    navigate(`/teacher/host-game/${session.id}`)
   }
 
   if (loading) {

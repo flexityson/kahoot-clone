@@ -1,12 +1,9 @@
-const { getIO } = require('../../config/socket')
 const sessionService = require('../../services/session.service')
 const prisma = require('../../config/database')
 
-function initPlayerHandlers() {
-  const io = getIO()
-
+function initPlayerHandlers(io, socket) {
   // Player joins game with PIN
-  io.on('player:join', async ({ pin, nickname, avatar, userId }, socket) => {
+  socket.on('player:join', async ({ pin, nickname, avatar, userId }) => {
     try {
       const session = await sessionService.getSessionByPin(pin)
 
@@ -75,7 +72,7 @@ function initPlayerHandlers() {
   })
 
   // Player submits answer
-  io.on('player:answer', async ({ playerId, questionId, optionId, timeTaken }, socket) => {
+  socket.on('player:answer', async ({ playerId, questionId, optionId, timeTaken }) => {
     try {
       const player = await prisma.player.findUnique({
         where: { id: playerId },
@@ -141,7 +138,7 @@ function initPlayerHandlers() {
   })
 
   // Player leaves game
-  io.on('player:leave', async ({ playerId, sessionId }, socket) => {
+  socket.on('player:leave', async ({ playerId, sessionId }) => {
     try {
       await prisma.player.delete({
         where: { id: playerId }
