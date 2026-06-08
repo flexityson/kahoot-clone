@@ -4,6 +4,9 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+"jest": { "testEnvironment": "jsdom", "transform": { "^.+\\.[tj]sx?$": ["babel-jest", { "useESM": true }] }, "extensionsToTreatAsEsm": [".js", ".jsx"] },
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
