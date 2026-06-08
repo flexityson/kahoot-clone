@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import QRCodeDisplay from '../../components/shared/QRCodeDisplay'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getSocket, connectSocket } from '../../services/socketService'
 import Button from '../../components/shared/Button'
@@ -6,6 +7,7 @@ import toast from 'react-hot-toast'
 
 export default function TeacherHostGame() {
   const { sessionId } = useParams()
+  const lobbyUrl = `${window.location.origin}/lobby/${sessionId}`
   const navigate = useNavigate()
   const socket = getSocket() || connectSocket()
   const [players, setPlayers] = useState([])
@@ -125,6 +127,12 @@ export default function TeacherHostGame() {
               </Button>
             </div>
           )}
+        </div>
+
+        {/* QR Code for students to join */}
+        <div className="mt-6 text-center">
+          <p className="text-sm text-gray-400 mb-2">Scan to join game</p>
+          <QRCodeDisplay url={lobbyUrl} size={200} />
         </div>
 
         {/* Players list */}
