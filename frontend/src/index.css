@@ -1,8 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
 :root {
   font-family: 'Plus Jakarta Sans', 'Outfit', system-ui, -apple-system, sans-serif;
@@ -24,7 +24,6 @@ body {
 }
 
 /* --- Premium Custom Animations --- */
-
 @keyframes float {
   0% { transform: translateY(0px) rotate(0deg); }
   50% { transform: translateY(-10px) rotate(1deg); }
@@ -63,74 +62,22 @@ body {
 }
 
 /* --- Styling Helpers --- */
-
-.animate-float {
-  animation: float 6s ease-in-out infinite;
-}
-
-.animate-float-delayed {
-  animation: float-delayed 8s ease-in-out infinite;
-}
-
-.animate-pulse-soft {
-  animation: pulse-soft 3s ease-in-out infinite;
-}
-
-.animate-text-glow {
-  animation: text-glow 4s ease-in-out infinite;
-}
-
-.animate-slide-up {
-  animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-
-.animate-scale-up {
-  animation: scale-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
+.animate-float { animation: float 6s ease-in-out infinite; }
+.animate-float-delayed { animation: float-delayed 8s ease-in-out infinite; }
+.animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
+.animate-text-glow { animation: text-glow 4s ease-in-out infinite; }
+.animate-slide-up { animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+.animate-scale-up { animation: scale-up 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
 
 /* Glassmorphism Panels */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-}
-
-.glass-panel-dark {
-  background: rgba(15, 23, 42, 0.65);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
+.glass-panel { background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.3); }
+.glass-panel-dark { background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.1); }
 
 /* Tactile 3D Buttons (Kahoot Style) */
-.btn-tactile {
-  position: relative;
-  transition: all 0.1s ease;
-  transform: translateY(0);
-}
-
-.btn-tactile:active {
-  transform: translateY(4px);
-}
-
-.btn-tactile::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: -4px;
-  height: 4px;
-  border-radius: inherit;
-  filter: brightness(0.75);
-  z-index: -1;
-  transition: all 0.1s ease;
-}
-
-.btn-tactile:active::after {
-  bottom: 0;
-  height: 0;
-}
+.btn-tactile { position: relative; transition: all 0.1s ease; transform: translateY(0); }
+.btn-tactile:active { transform: translateY(4px); }
+.btn-tactile::after { content: ''; position: absolute; left: 0; right: 0; bottom: -4px; height: 4px; border-radius: inherit; filter: brightness(0.75); z-index: -1; transition: all 0.1s ease; }
+.btn-tactile:active::after { bottom: 0; height: 0; }
 
 /* Specific button color bevel overrides */
 .btn-tactile-red::after { background-color: #ef4444; }
@@ -140,36 +87,14 @@ body {
 .btn-tactile-purple::after { background-color: #8b5cf6; }
 
 /* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.3);
-  border-radius: 4px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(148, 163, 184, 0.5);
-}
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(148, 163, 184, 0.3); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.5); }
 
 /* Input text override to prevent white-on-white text */
-input, select, textarea {
-  color: #0f172a !important;
-  background-color: #ffffff !important;
-}
-
-input::placeholder {
-  color: #94a3b8 !important;
-}
+input, select, textarea { color: #0f172a !important; background-color: #ffffff !important; }
+input::placeholder { color: #94a3b8 !important; }
 
 /* Confetti styling */
-.confetti {
-  position: absolute;
-  width: 10px;
-  height: 24px;
-  opacity: 0.8;
-  animation: confetti-fall 4s linear infinite;
-}
+.confetti { position: absolute; width: 10px; height: 24px; opacity: 0.8; animation: confetti-fall 4s linear infinite; }

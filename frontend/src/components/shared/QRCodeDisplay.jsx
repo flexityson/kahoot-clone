@@ -23,4 +23,5 @@ function QRCodeDisplay({ url, size = 256 }) {
   });
 }
 
+export default QRCodeDisplay;
 module.exports = QRCodeDisplay;
