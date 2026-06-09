@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
-import QRCodeDisplay from '../../components/shared/QRCodeDisplay'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getSocket, connectSocket } from '../../services/socketService'
 import Button from '../../components/shared/Button'
 import toast from 'react-hot-toast'
+import QRCodeDisplay from '../../components/shared/QRCodeDisplay'
 
 export default function TeacherHostGame() {
   const { sessionId } = useParams()
