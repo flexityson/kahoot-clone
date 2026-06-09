@@ -1,14 +1,15 @@
 const prisma = require('../config/database')
-const { hashPassword, verifyPassword, generateToken } = require('../utils/jwtHelper')
+const bcrypt = require('bcryptjs')
+const { generateToken } = require('../utils/jwtHelper')
 
 async function register(name, email, password, role = 'STUDENT') {
   const existingUser = await prisma.user.findUnique({ where: { email } })
 
   if (existingUser) {
-    throw new Error('Registration failed')
+    throw new Error('Email already registered')
   }
 
-  const hashedPassword = await hashPassword(password)
+  const hashedPassword = await bcrypt.hash(password, 10)
 
   const user = await prisma.user.create({
     data: { name, email, password: hashedPassword, role }
@@ -29,7 +30,7 @@ async function login(email, password) {
     throw new Error('Invalid email or password')
   }
 
-  const isValid = await verifyPassword(password, user.password)
+  const isValid = await bcrypt.compare(password, user.password)
 
   if (!isValid) {
     throw new Error('Invalid email or password')
