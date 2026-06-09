@@ -1,5 +1,5 @@
-const React = require('react');
-const QRCode = require('qrcode');
+import React from 'react';
+import QRCode from 'qrcode';
 
 // QRCodeDisplay renders a canvas element that can be used to draw a QR code.
 // For now it simply renders an empty canvas with appropriate accessibility attributes.
