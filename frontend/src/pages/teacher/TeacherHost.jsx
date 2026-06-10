@@ -7,6 +7,7 @@ import { useGameStore } from '../../store/gameStore'
 import Button from '../../components/shared/Button'
 import Loader from '../../components/shared/Loader'
 import toast from 'react-hot-toast'
+import JoinQrCard from '../../components/teacher/JoinQrCard'
 
 export default function TeacherHost() {
   const { id } = useParams()
@@ -19,12 +20,29 @@ export default function TeacherHost() {
 
   useEffect(() => {
     loadQuiz()
-    setupSocketListeners()
+
+    const onPlayerJoined = (data) => {
+      setSession(prev => ({
+        ...prev,
+        players: [...(prev?.players || []), data.player]
+      }))
+    }
+
+    const onPlayerLeft = (data) => {
+      setSession(prev => ({
+        ...prev,
+        players: (prev?.players || []).filter(p => p.id !== data.playerId)
+      }))
+    }
+
+    socket.on('lobby:player_joined', onPlayerJoined)
+    socket.on('lobby:player_left', onPlayerLeft)
 
     return () => {
-      socket.off('lobby:player_joined')
+      socket.off('lobby:player_joined', onPlayerJoined)
+      socket.off('lobby:player_left', onPlayerLeft)
     }
-  }, [socket])
+  }, [socket, id])
 
   const loadQuiz = async () => {
     try {
@@ -36,15 +54,6 @@ export default function TeacherHost() {
     } finally {
       setLoading(false)
     }
-  }
-
-  const setupSocketListeners = () => {
-    socket.on('lobby:player_joined', (data) => {
-      setSession(prev => ({
-        ...prev,
-        players: [...(prev?.players || []), data.player]
-      }))
-    })
   }
 
   const createSession = async () => {
@@ -86,12 +95,11 @@ export default function TeacherHost() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 to-purple-900 p-8">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl p-8 text-center">
+        <div className="bg-white rounded-2xl p-8">
           <h1 className="text-3xl font-bold mb-2">{quiz?.title}</h1>
-          <p className="text-gray-600 mb-6">Game PIN</p>
-          <div className="text-6xl font-bold text-purple-600 mb-8">
-            {session.pin}
-          </div>
+
+          <JoinQrCard pin={session.pin} />
+
           <p className="text-lg mb-6">
             {session.players?.length || 0} player(s) joined
           </p>
@@ -107,7 +115,7 @@ export default function TeacherHost() {
           )}
 
           <p className="text-sm text-gray-500 mt-4">
-            Students go to /join and enter the PIN
+            Students join by scanning the QR code above
           </p>
         </div>
       </div>

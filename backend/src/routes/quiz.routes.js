@@ -52,11 +52,11 @@ const updateQuestionsSchema = z.object({
   })).min(1, 'Must have at least 1 question')
 })
 
-router.get('/', authMiddleware, quizController.getAllQuizzes)
-router.get('/:id', authMiddleware, validate(quizIdSchema), quizController.getQuiz)
+router.get('/', authMiddleware, roleMiddleware('TEACHER'), quizController.getAllQuizzes)
+router.get('/:id', authMiddleware, roleMiddleware('TEACHER'), validate(quizIdSchema), quizController.getQuiz)
 router.post('/', authMiddleware, roleMiddleware('TEACHER'), validate(createQuizSchema), quizController.createQuiz)
 router.put('/:id', authMiddleware, roleMiddleware('TEACHER'), validate(updateQuizSchema), quizController.updateQuiz)
 router.put('/:id/questions', authMiddleware, roleMiddleware('TEACHER'), validate(updateQuestionsSchema), quizController.updateQuestions)
-router.delete('/:id', authMiddleware, validate(quizIdSchema), quizController.deleteQuiz)
+router.delete('/:id', authMiddleware, roleMiddleware('TEACHER'), validate(quizIdSchema), quizController.deleteQuiz)
 
 module.exports = router

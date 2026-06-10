@@ -1,6 +1,8 @@
+// frontend/src/pages/game/JoinGame.jsx
 import { useState, useEffect } from 'react'
 import { useNavigate, useSearchParams, Link } from 'react-router-dom'
 import { sessionService } from '../../services/sessionService'
+import { extractPinFromUrl } from '../../utils/joinUrl'
 import Button from '../../components/shared/Button'
 import toast from 'react-hot-toast'
 
@@ -11,23 +13,41 @@ export default function JoinGame() {
   const navigate = useNavigate()
 
   useEffect(() => {
+    // Extract PIN from URL parameters or path
     const urlPin = searchParams.get('pin')
     if (urlPin) {
-      setPin(urlPin.replace(/\D/g, '').slice(0, 6))
+      setPin(urlPin.replace(/[^0-9]/g, '').slice(0, 6))
+    }
+
+    // Also check if we're on /join/:pin route
+    const pathPin = extractPinFromUrl(window.location.pathname + window.location.search)
+    if (pathPin) {
+      setPin(pathPin)
     }
   }, [searchParams])
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (pin.length < 4) {
-      toast.error('Please enter a valid game PIN')
+    if (pin.length < 6) {
+      toast.error('Please enter a valid 6-digit game PIN')
       return
     }
+
+    // Validate PIN format
+    if (!/^\d{6}$/.test(pin)) {
+      toast.error('Invalid PIN format. Use 6 digits.')
+      return
+    }
+
     setLoading(true)
 
     try {
       const session = await sessionService.getSessionByPin(pin)
-      navigate(`/lobby/${session.id}`)
+      navigate(`/lobby/${session.id}`, {
+        state: {
+          pin: pin
+        }
+      })
     } catch (error) {
       toast.error('Invalid game PIN. Please check and try again.')
     } finally {
@@ -40,7 +60,7 @@ export default function JoinGame() {
       {/* Decorative background shapes */}
       <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-purple-900/20 blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-900/20 blur-[120px] pointer-events-none"></div>
-      
+
       {/* Grid pattern overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
 
@@ -59,21 +79,21 @@ export default function JoinGame() {
             <label className="block text-xs font-bold uppercase tracking-widest text-slate-400">Game PIN</label>
             <input
               type="text"
-              pattern="[0-9]*"
+               pattern="[0-9]*"
               maxLength={6}
               value={pin}
-              onChange={(e) => setPin(e.target.value.replace(/\D/g, '').slice(0, 6))}
-              placeholder="000000"
+               onChange={(e) => setPin(e.target.value.replace(/[^0-9]/g, '').slice(0, 6))}
+               placeholder="123456"
               className="w-full text-center text-3xl font-black tracking-[0.2em] py-4 rounded-2xl border-2 border-slate-700 bg-slate-900 text-white focus:border-purple-500 focus:outline-none placeholder:tracking-normal placeholder:text-lg uppercase transition-all duration-200"
               required
               autoFocus
             />
           </div>
 
-          <Button 
-            type="submit" 
-            disabled={loading || pin.length < 4} 
-            variant="primary" 
+          <Button
+            type="submit"
+             disabled={loading || pin.length < 6}
+            variant="primary"
             className="w-full py-4 text-base font-black tracking-widest"
           >
             {loading ? '🚀 Connecting...' : '🚀 ENTER LOBBY'}

@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { getSocket, connectSocket } from '../../services/socketService'
 import { useGameStore } from '../../store/gameStore'
@@ -14,33 +14,44 @@ export default function GamePlay() {
   const [timeLeft, setTimeLeft] = useState(0)
   const [answered, setAnswered] = useState(false)
   const [selectedOption, setSelectedOption] = useState(null)
+  const timerRef = useRef(null)
   
   // Track answer feedback
   const [isCorrect, setIsCorrect] = useState(null)
   const [pointsEarned, setPointsEarned] = useState(0)
 
-  useEffect(() => {
-    const cleanup = setupSocketListeners()
-    return () => {
-      if (cleanup) cleanup()
+  // Server-synced timer: clear local interval and use server ticks
+  const clearLocalTimer = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current)
+      timerRef.current = null
     }
   }, [])
 
   useEffect(() => {
-    if (currentQuestion && timeLeft > 0 && !answered && gameState === 'playing') {
-      const timer = setInterval(() => {
+    const cleanup = setupSocketListeners()
+    return () => {
+      clearLocalTimer()
+      if (cleanup) cleanup()
+    }
+  }, [])
+
+  // Fallback local timer only if no server tick received within 1.5s
+  useEffect(() => {
+    if (currentQuestion && !answered && gameState === 'playing') {
+      timerRef.current = setInterval(() => {
         setTimeLeft((prev) => {
           if (prev <= 1) {
-            clearInterval(timer)
+            clearLocalTimer()
             return 0
           }
           return prev - 1
         })
       }, 1000)
 
-      return () => clearInterval(timer)
+      return () => clearLocalTimer()
     }
-  }, [currentQuestion, timeLeft, answered, gameState])
+  }, [currentQuestion, answered, gameState, clearLocalTimer])
 
   useEffect(() => {
     if (gameState === 'ended') {
@@ -50,6 +61,7 @@ export default function GamePlay() {
 
   const setupSocketListeners = () => {
     const onQuestionNew = (data) => {
+      clearLocalTimer()
       setCurrentQuestion(data.question, data.questionIndex, data.totalQuestions)
       setTimeLeft(data.question.timeLimit)
       setAnswered(false)
@@ -59,7 +71,20 @@ export default function GamePlay() {
       setGameState('playing')
     }
 
+    // Sync timer with server ticks
+    const onTimerTick = (data) => {
+      if (data && typeof data.remaining === 'number') {
+        setTimeLeft(data.remaining)
+      }
+    }
+
+    const onTimerEnded = () => {
+      clearLocalTimer()
+      setTimeLeft(0)
+    }
+
     const onQuestionResults = () => {
+      clearLocalTimer()
       setGameState('results')
     }
 
@@ -72,16 +97,21 @@ export default function GamePlay() {
     }
 
     const onGameEnded = () => {
+      clearLocalTimer()
       setGameState('ended')
     }
 
     socket.on('question:new', onQuestionNew)
+    socket.on('timer:tick', onTimerTick)
+    socket.on('timer:ended', onTimerEnded)
     socket.on('question:results', onQuestionResults)
     socket.on('answer:received', onAnswerReceived)
     socket.on('game:ended', onGameEnded)
 
     return () => {
       socket.off('question:new', onQuestionNew)
+      socket.off('timer:tick', onTimerTick)
+      socket.off('timer:ended', onTimerEnded)
       socket.off('question:results', onQuestionResults)
       socket.off('answer:received', onAnswerReceived)
       socket.off('game:ended', onGameEnded)
@@ -93,6 +123,7 @@ export default function GamePlay() {
 
     setSelectedOption(optionId)
     socket.emit('player:answer', {
+      sessionId,
       playerId: player?.id,
       questionId: currentQuestion.id,
       optionId,

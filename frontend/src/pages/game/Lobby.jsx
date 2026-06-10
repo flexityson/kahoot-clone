@@ -1,5 +1,6 @@
+// frontend/src/pages/game/Lobby.jsx
 import { useEffect, useState } from 'react'
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams, useNavigate, useLocation } from 'react-router-dom'
 import { sessionService } from '../../services/sessionService'
 import { getSocket, connectSocket } from '../../services/socketService'
 import { useGameStore } from '../../store/gameStore'
@@ -7,20 +8,46 @@ import { useAuthStore } from '../../store/authStore'
 import Button from '../../components/shared/Button'
 import Loader from '../../components/shared/Loader'
 import toast from 'react-hot-toast'
+import { extractPinFromUrl } from '../../utils/joinUrl'
 
 export default function Lobby() {
   const { sessionId } = useParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useAuthStore()
   const { setSession, setPlayer } = useGameStore()
   const [session, setSessionState] = useState(null)
   const [nickname, setNickname] = useState('')
   const [avatar, setAvatar] = useState('🐶')
   const [joined, setJoined] = useState(false)
+  const [loadError, setLoadError] = useState(false)
   const socket = getSocket() || connectSocket()
 
   useEffect(() => {
-    loadSession()
+    // Extract PIN from URL if no sessionId is provided
+    // This handles direct /play/:pin access
+    if (!sessionId) {
+      const extractedPin = extractPinFromUrl(location.pathname + location.search)
+      if (extractedPin) {
+        // Fetch session by PIN and navigate to proper URL
+        const fetchSession = async () => {
+          try {
+            const sessionData = await sessionService.getSessionByPin(extractedPin)
+            navigate(`/lobby/${sessionData.id}`)
+          } catch (error) {
+            toast.error('Unable to find session with this PIN')
+            navigate('/')
+          }
+        }
+        fetchSession()
+      }
+    }
+  }, [sessionId, location])
+
+  useEffect(() => {
+    if (sessionId) {
+      loadSession()
+    }
     setupSocketListeners()
 
     return () => {
@@ -28,16 +55,23 @@ export default function Lobby() {
       socket.off('lobby:player_joined')
       socket.off('game:started')
     }
-  }, [])
+  }, [sessionId])
 
   const loadSession = async () => {
     try {
       const data = await sessionService.getSession(sessionId)
       setSessionState(data)
       setSession(data)
+      setLoadError(false)
+
+      // If we have state from join form, use it
+      if (location.state && location.state.pin) {
+        setNickname(location.state.nickname || '')
+        setAvatar(location.state.avatar || '🐶')
+      }
     } catch (error) {
+      setLoadError(true)
       toast.error('Failed to load game session')
-      navigate('/')
     }
   }
 
@@ -81,6 +115,21 @@ export default function Lobby() {
     })
   }
 
+  if (loadError) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 text-center">
+        <div className="space-y-4">
+          <span className="text-6xl inline-block">⚠️</span>
+          <h2 className="text-2xl font-black text-white">Session Not Found</h2>
+          <p className="text-slate-400">Unable to load the game session. It may have ended or the link is invalid.</p>
+          <button onClick={() => navigate('/')} className="text-purple-400 font-bold hover:text-purple-300 transition">
+            ← Back to Home
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   if (!session) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -94,7 +143,7 @@ export default function Lobby() {
       {/* Decorative background shapes */}
       <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] rounded-full bg-purple-900/20 blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-[-20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-900/20 blur-[120px] pointer-events-none"></div>
-      
+
       {/* Grid pattern overlay */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none"></div>
 
@@ -153,10 +202,10 @@ export default function Lobby() {
                   </div>
                 </div>
 
-                <Button 
-                  onClick={handleJoin} 
-                  disabled={!nickname.trim()} 
-                  variant="primary" 
+                <Button
+                  onClick={handleJoin}
+                  disabled={!nickname.trim()}
+                  variant="primary"
                   className="w-full py-4 text-base font-black tracking-widest mt-4"
                 >
                   🚀 JOIN ROOM
@@ -188,8 +237,8 @@ export default function Lobby() {
                 ) : (
                   <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-h-72 overflow-y-auto pr-2">
                     {session.players?.map((player) => (
-                      <div 
-                        key={player.id} 
+                      <div
+                        key={player.id}
                         className="bg-slate-900/50 border border-slate-800 rounded-xl p-4 flex flex-col items-center justify-center animate-scale-up hover:-translate-y-0.5 transition-all duration-200"
                       >
                         <span className="text-3xl mb-2">{player.avatar || '👤'}</span>

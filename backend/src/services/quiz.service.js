@@ -78,7 +78,17 @@ async function updateQuiz(id, data) {
   })
 }
 
-async function deleteQuiz(id) {
+async function deleteQuiz(id, teacherId) {
+  // Verify ownership before deleting
+  const quiz = await prisma.quiz.findUnique({
+    where: { id }
+  })
+  if (!quiz) {
+    throw new Error('Quiz not found')
+  }
+  if (quiz.teacherId !== teacherId) {
+    throw new Error('Not authorized to delete this quiz')
+  }
   return prisma.quiz.delete({
     where: { id }
   })

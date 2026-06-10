@@ -2,6 +2,17 @@ const prisma = require('../config/database')
 const generatePIN = require('../utils/generatePIN')
 
 async function createSession(quizId, hostId) {
+  // Verify the quiz exists and belongs to the host
+  const quiz = await prisma.quiz.findUnique({
+    where: { id: quizId }
+  })
+  if (!quiz) {
+    throw new Error('Quiz not found')
+  }
+  if (quiz.teacherId !== hostId) {
+    throw new Error('Not authorized to create a session for this quiz')
+  }
+
   let pin
   let attempts = 0
   const maxAttempts = 3

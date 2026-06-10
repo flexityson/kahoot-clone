@@ -91,7 +91,7 @@ async function updateQuestions(req, res, next) {
 
 async function deleteQuiz(req, res, next) {
   try {
-    await quizService.deleteQuiz(req.params.id)
+    await quizService.deleteQuiz(req.params.id, req.user.id)
 
     res.status(200).json({
       success: true,

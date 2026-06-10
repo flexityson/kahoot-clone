@@ -56,7 +56,15 @@ async function getLeaderboard(req, res, next) {
     const players = await prisma.player.findMany({
       where: { sessionId: req.params.id },
       orderBy: { totalScore: 'desc' },
-      include: { user: true }
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            role: true
+          }
+        }
+      }
     })
 
     const leaderboard = players.map((p, index) => ({

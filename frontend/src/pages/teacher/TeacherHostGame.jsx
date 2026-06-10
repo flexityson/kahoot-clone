@@ -20,37 +20,42 @@ export default function TeacherHostGame() {
   useEffect(() => {
     socket.emit('host:join_session', { sessionId })
 
-    socket.on('lobby:player_joined', (data) => {
+    const onPlayerJoined = (data) => {
       setPlayers(prev => [...prev, data.player])
-    })
+    }
 
-    socket.on('lobby:player_left', (data) => {
+    const onPlayerLeft = (data) => {
       setPlayers(prev => prev.filter(p => p.id !== data.playerId))
-    })
+    }
 
-    socket.on('host:question_started', (data) => {
+    const onQuestionStarted = (data) => {
       setCurrentQuestion(data.question)
       setQuestionIndex(data.questionIndex)
       setTotalQuestions(data.totalQuestions)
       setTimeLeft(data.timeLimit)
       setPhase('playing')
-    })
+    }
 
-    socket.on('host:question_ended', (data) => {
+    const onQuestionEnded = (data) => {
       setPhase('results')
-      // could show answer distribution from data
-    })
+    }
 
-    socket.on('host:game_ended', () => {
+    const onGameEnded = () => {
       setPhase('ended')
-    })
+    }
+
+    socket.on('lobby:player_joined', onPlayerJoined)
+    socket.on('lobby:player_left', onPlayerLeft)
+    socket.on('host:question_started', onQuestionStarted)
+    socket.on('host:question_ended', onQuestionEnded)
+    socket.on('host:game_ended', onGameEnded)
 
     return () => {
-      socket.off('lobby:player_joined')
-      socket.off('lobby:player_left')
-      socket.off('host:question_started')
-      socket.off('host:question_ended')
-      socket.off('host:game_ended')
+      socket.off('lobby:player_joined', onPlayerJoined)
+      socket.off('lobby:player_left', onPlayerLeft)
+      socket.off('host:question_started', onQuestionStarted)
+      socket.off('host:question_ended', onQuestionEnded)
+      socket.off('host:game_ended', onGameEnded)
     }
   }, [sessionId])
 
