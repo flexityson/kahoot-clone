@@ -6,24 +6,33 @@
   "scripts": {
     "test": "jest",
     "test:watch": "jest --watch",
-    "jest": {
-      "testEnvironment": "jsdom",
-      "transform": {
-        "^.+\\.[tj]sx?$": [
-          "babel-jest",
-          {
-            "useESM": true
-          }
-        ]
-      },
-      "extensionsToTreatAsEsm": [
-        ".js",
-        ".jsx"
-      ]
-    },
+    "typecheck": "tsc --noEmit",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "moduleFileExtensions": [
+      "js",
+      "jsx",
+      "ts",
+      "tsx"
+    ],
+    "transform": {
+      "^.+\\.tsx?$": "babel-jest",
+      "^.+\\.jsx?$": "babel-jest"
+    },
+    "setupFilesAfterEnv": [
+      "<rootDir>/jest.setup.cjs"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/backend/"
+    ]
   },
   "dependencies": {
     "axios": "^1.7.2",
@@ -33,22 +42,28 @@
     "react-dom": "^18.3.1",
     "react-dropzone": "^14.2.3",
     "react-hot-toast": "^2.4.1",
+    "react-qr-code": "^2.2.0",
     "react-router-dom": "^6.23.1",
     "socket.io-client": "^4.7.5",
     "zustand": "^4.5.2"
   },
   "devDependencies": {
+    "@babel/preset-env": "^7.29.7",
     "@babel/preset-react": "^7.29.7",
+    "@babel/preset-typescript": "^7.29.7",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
+    "@types/jest": "^30.0.0",
     "@types/react": "^18.3.3",
     "@types/react-dom": "^18.3.0",
     "@vitejs/plugin-react": "^4.3.0",
     "autoprefixer": "^10.4.19",
     "babel-jest": "^30.4.1",
     "jest": "^30.4.2",
+    "jest-environment-jsdom": "^30.4.1",
     "postcss": "^8.4.38",
     "tailwindcss": "^3.4.4",
+    "typescript": "^6.0.3",
     "vite": "^5.3.1"
   }
 }

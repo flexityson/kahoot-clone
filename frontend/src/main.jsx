@@ -1,3 +1,4 @@
+// frontend/src/main.jsx
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
@@ -48,6 +49,8 @@ createRoot(document.getElementById('root')).render(
 
         {/* Game Routes */}
         <Route path="/join" element={<JoinGame />} />
+        <Route path="/join/:pin" element={<JoinGame />} />
+        <Route path="/play/:pin" element={<Lobby />} />
         <Route path="/lobby/:sessionId" element={<Lobby />} />
         <Route path="/game/:sessionId" element={<GamePlay />} />
         <Route path="/results/:sessionId" element={<FinalResults />} />

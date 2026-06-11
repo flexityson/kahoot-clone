@@ -1,0 +1,90 @@
+/* frontend/src/components/teacher/JoinQrCard.module.css */
+.container {
+  padding: 2rem;
+  text-align: center;
+  border-radius: 12px;
+  background: #f9f9f9;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.pin {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 1rem 0;
+  color: #333;
+}
+
+.qrContainer {
+  margin: 1.5rem auto;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qrLabel {
+  margin-top: 0.5rem;
+  font-size: 1rem;
+  color: #555;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.button.primary {
+  background-color: #10b981;
+  color: white;
+}
+
+.button.secondary {
+  background-color: #6b7280;
+  color: white;
+}
+
+.fullscreenOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.fullscreenContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: white;
+  padding: 2rem;
+  border-radius: 8px;
+}
+
+.qrcode {
+  background-color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+  .pin {
+    font-size: 2.5rem;
+  }
+}

@@ -1,7 +1,8 @@
+// backend/src/app.js
 const express = require('express')
 const cors = require('cors')
 const helmet = require('helmet')
-const env = require('./config/env')
+const { env } = require('./config/env')
 const { apiLimiter } = require('./middleware/rateLimit.middleware')
 const errorHandler = require('./middleware/errorHandler')
 
@@ -9,6 +10,7 @@ const authRoutes = require('./routes/auth.routes')
 const quizRoutes = require('./routes/quiz.routes')
 const pdfRoutes = require('./routes/pdf.routes')
 const sessionRoutes = require('./routes/session.routes')
+const qrRoutes = require('./routes/qr.routes')
 
 const app = express()
 
@@ -23,7 +25,7 @@ const allowedOrigins = [
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin) ||
-        (typeof origin === 'string' && origin.endsWith('.vercel.app') && origin.indexOf('://') > 0)) {
+      (typeof origin === 'string' && origin.endsWith('.vercel.app') && origin.indexOf('://') > 0)) {
       callback(null, true)
     } else {
       callback(new Error(`Origin ${origin} not allowed by CORS`))
@@ -38,6 +40,7 @@ app.use('/api/auth', authRoutes)
 app.use('/api/quiz', quizRoutes)
 app.use('/api/pdf', pdfRoutes)
 app.use('/api/session', sessionRoutes)
+app.use('/api', qrRoutes)
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok' })

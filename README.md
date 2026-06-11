@@ -177,7 +177,7 @@ kahoot-clone/
 │   │   └── app.js
 │   ├── prisma/
 │   │   └── schema.prisma
-│   └── server.js
+│   └── server.ts
 └── frontend/
     └── src/
         ├── components/

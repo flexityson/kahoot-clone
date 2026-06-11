@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: kahoot_user
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: kahoot_db
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6379:6379'
+    volumes:
+      - redis_data:/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: infra/docker/backend/Dockerfile
+    env_file:
+      - .env.example
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - '5000:5000'
+    volumes:
+      - ./backend:/app
+
+  frontend:
+    build:
+      context: .
+      dockerfile: infra/docker/frontend/Dockerfile
+    env_file:
+      - .env.example
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+
+volumes:
+  pg_data:
+  redis_data:

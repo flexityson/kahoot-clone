@@ -1,7 +1,7 @@
 const pdfParse = require('pdf-parse')
 const { Groq } = require('groq-sdk')
 const prisma = require('../config/database')
-const env = require('../config/env')
+const { env } = require('../config/env')
 
 let groq = null
 function getGroq() {

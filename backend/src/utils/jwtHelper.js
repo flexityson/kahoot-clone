@@ -1,6 +1,6 @@
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
-const env = require('../config/env')
+const { env } = require('../config/env')
 
 async function hashPassword(password) {
   return bcrypt.hash(password, 10)
